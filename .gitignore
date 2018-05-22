@@ -9,3 +9,6 @@
 *.iml
 *.apk
 *.jobf
+local
+first-build
+.maven
