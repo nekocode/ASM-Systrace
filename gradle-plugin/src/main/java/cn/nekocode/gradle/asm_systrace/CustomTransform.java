@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package cn.nekocode.gradle.asm_systrace
+package cn.nekocode.gradle.asm_systrace;
 
-import com.android.build.gradle.AppExtension
-import org.gradle.api.Plugin
-import org.gradle.api.Project
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
+
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * Debug command: ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.debug=true :example:build
- *
  * @author nekocode (nekocode.cn@gmail.com)
  */
-class AsmSystracePlugin implements Plugin<Project> {
+public interface CustomTransform {
 
-    @Override
-    void apply(Project project) {
-        def android = project.getExtensions().getByName("android")
+    @NonNull
+    String getName();
 
-        if (android != null && android instanceof AppExtension) {
-            final AppExtension appExtension = (AppExtension) android
-            appExtension.registerTransform(new CustomClassTransform(new AsmSystraceTransform()))
-        }
-    }
+    @Nullable
+    File getSecondaryFile();
+
+    void transform(@NonNull InputStream is, @NonNull OutputStream os);
 }

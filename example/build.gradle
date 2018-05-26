@@ -16,7 +16,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "cn.nekocode.asm_systrace.example"
-        minSdkVersion 14
+        minSdkVersion 18
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
