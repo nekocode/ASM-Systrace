@@ -1,17 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'asm-systrace'
 
-buildscript {
-    repositories {
-        maven { url project(':gradle-plugin').file('.maven').toURI() }
-        google()
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.nekocode:asm-systrace-plugin:local'
-    }
-}
-
 android {
     compileSdkVersion 27
     defaultConfig {
