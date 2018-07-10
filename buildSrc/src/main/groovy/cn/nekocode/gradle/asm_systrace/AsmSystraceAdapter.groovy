@@ -19,32 +19,45 @@ package cn.nekocode.gradle.asm_systrace
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.commons.AdviceAdapter
 
 /**
  * @author nekocode (nekocode.cn@gmail.com)
  */
 class AsmSystraceAdapter extends ClassVisitor {
+    String className
 
-    AsmSystraceAdapter(ClassVisitor cv) {
+
+    AsmSystraceAdapter(ClassVisitor cv, String className) {
         super(Opcodes.ASM5, cv)
+        this.className = className.split("/").last()
     }
 
     @Override
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         final MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions)
-        return mv != null ? new MethodAdapter(api, mv) : null
+        return mv != null ? new MethodAdapter(api, mv, access, name, desc) : null
     }
 
 
-    class MethodAdapter extends MethodVisitor implements Opcodes {
+    class MethodAdapter extends AdviceAdapter {
+        String methodName
 
-        protected MethodAdapter(int api, MethodVisitor mv) {
-            super(api, mv)
+
+        protected MethodAdapter(int api, MethodVisitor mv, int access, String name, String desc) {
+            super(api, mv, access, name, desc)
+            this.methodName = name
         }
 
         @Override
-        void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-            super.visitMethodInsn(opcode, owner, name, desc, itf)
+        protected void onMethodEnter() {
+            mv.visitLdcInsn(className + "#" + methodName)
+            mv.visitMethodInsn(INVOKESTATIC, "android/os/Trace", "beginSection", "(Ljava/lang/String;)V", false)
+        }
+
+        @Override
+        protected void onMethodExit(int opcode) {
+            mv.visitMethodInsn(INVOKESTATIC, "android/os/Trace", "endSection", "()V", false)
         }
     }
 }

@@ -42,11 +42,12 @@ class AsmSystraceTransform implements CustomTransform {
     @Override
     void transform(@NonNull InputStream is, @NonNull OutputStream os) {
         final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS)
-        final ClassVisitor visitor = new AsmSystraceAdapter(writer)
 
         try {
             final ClassReader cr = new ClassReader(is)
-            cr.accept(visitor, 0)
+            final ClassVisitor visitor = new AsmSystraceAdapter(writer, cr.getClassName())
+
+            cr.accept(visitor, ClassReader.EXPAND_FRAMES)
             os.write(writer.toByteArray())
 
         } catch (IOException e) {

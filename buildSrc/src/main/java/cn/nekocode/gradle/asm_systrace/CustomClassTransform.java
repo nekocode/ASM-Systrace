@@ -80,7 +80,7 @@ public class CustomClassTransform extends Transform {
     @NonNull
     @Override
     public Set<QualifiedContent.ContentType> getOutputTypes() {
-        return ImmutableSet.of(CLASSES, NATIVE_LIBS);
+        return ImmutableSet.<QualifiedContent.ContentType>of(CLASSES, NATIVE_LIBS);
     }
 
     @NonNull
@@ -93,7 +93,7 @@ public class CustomClassTransform extends Transform {
     @Override
     public Collection<SecondaryFile> getSecondaryFiles() {
         final File secondaryFile = transform.getSecondaryFile();
-        return secondaryFile == null ? ImmutableSet.of() :
+        return secondaryFile == null ? ImmutableSet.<SecondaryFile>of() :
                 ImmutableSet.of(SecondaryFile.nonIncremental(secondaryFile));
     }
 
