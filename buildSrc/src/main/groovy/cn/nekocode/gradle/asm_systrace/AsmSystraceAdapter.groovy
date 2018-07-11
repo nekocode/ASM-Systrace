@@ -26,32 +26,35 @@ import org.objectweb.asm.commons.AdviceAdapter
  */
 class AsmSystraceAdapter extends ClassVisitor {
     String className
+    Script filterScript
 
 
-    AsmSystraceAdapter(ClassVisitor cv, String className) {
+    AsmSystraceAdapter(ClassVisitor cv, String className, Script filterScript) {
         super(Opcodes.ASM5, cv)
-        this.className = className.split("/").last()
+        this.className = className
+        this.filterScript = filterScript
     }
 
     @Override
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         final MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions)
-        return mv != null ? new MethodAdapter(api, mv, access, name, desc) : null
+        final String tagName = filterScript.invokeMethod("filter", [className, name, desc])
+        return tagName == null ? mv : (mv != null ? new MethodAdapter(api, mv, access, name, desc, tagName) : null)
     }
 
 
     class MethodAdapter extends AdviceAdapter {
-        String methodName
+        String tagName
 
 
-        protected MethodAdapter(int api, MethodVisitor mv, int access, String name, String desc) {
+        protected MethodAdapter(int api, MethodVisitor mv, int access, String name, String desc, String tagName) {
             super(api, mv, access, name, desc)
-            this.methodName = name
+            this.tagName = tagName
         }
 
         @Override
         protected void onMethodEnter() {
-            mv.visitLdcInsn(className + "#" + methodName)
+            mv.visitLdcInsn(tagName)
             mv.visitMethodInsn(INVOKESTATIC, "android/os/Trace", "beginSection", "(Ljava/lang/String;)V", false)
         }
 

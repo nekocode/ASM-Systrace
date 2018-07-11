@@ -18,6 +18,7 @@ package cn.nekocode.gradle.asm_systrace
 
 import com.android.annotations.NonNull
 import com.android.annotations.Nullable
+import org.gradle.api.Project
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -26,6 +27,13 @@ import org.objectweb.asm.ClassWriter
  * @author nekocode (nekocode.cn@gmail.com)
  */
 class AsmSystraceTransform implements CustomTransform {
+    Project project
+    Script filterScript
+
+
+    AsmSystraceTransform(Project project) {
+        this.project = project
+    }
 
     @NonNull
     @Override
@@ -36,7 +44,9 @@ class AsmSystraceTransform implements CustomTransform {
     @Nullable
     @Override
     File getSecondaryFile() {
-        return null
+        final File scriptFile = (project.getExtensions().getByName('asmSystrace') as AsmSystraceConfig).filterScript
+        filterScript = new GroovyShell().parse(scriptFile)
+        return scriptFile
     }
 
     @Override
@@ -45,7 +55,7 @@ class AsmSystraceTransform implements CustomTransform {
 
         try {
             final ClassReader cr = new ClassReader(is)
-            final ClassVisitor visitor = new AsmSystraceAdapter(writer, cr.getClassName())
+            final ClassVisitor visitor = new AsmSystraceAdapter(writer, cr.getClassName(), filterScript)
 
             cr.accept(visitor, ClassReader.EXPAND_FRAMES)
             os.write(writer.toByteArray())

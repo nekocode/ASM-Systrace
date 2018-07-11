@@ -1,12 +1,8 @@
 package cn.nekocode.asm_systrace.example;
 
-import android.os.Trace;
-
 public class SomeClass {
     public static void a() {
-        Trace.beginSection("a");
         new SomeClass().c();
-        Trace.endSection();
     }
 
     public static void b() {

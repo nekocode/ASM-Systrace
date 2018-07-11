@@ -16,26 +16,9 @@
 
 package cn.nekocode.gradle.asm_systrace
 
-import com.android.build.gradle.AppExtension
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-
 /**
- * Debug command: ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.debug=true :example:build
- *
  * @author nekocode (nekocode.cn@gmail.com)
  */
-class AsmSystracePlugin implements Plugin<Project> {
-
-    @Override
-    void apply(Project project) {
-        project.getExtensions().create('asmSystrace', AsmSystraceConfig)
-
-        def android = project.getExtensions().getByName("android")
-
-        if (android != null && android instanceof AppExtension) {
-            final AppExtension appExtension = (AppExtension) android
-            appExtension.registerTransform(new CustomClassTransform(new AsmSystraceTransform(project)))
-        }
-    }
+class AsmSystraceConfig {
+    File filterScript
 }
