@@ -1,5 +1,5 @@
 # README
-[![Apache 2.0 License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0.html)
+[![Apache 2.0 License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Release](https://jitpack.io/v/nekocode/ASM-Systrace.svg)](https://jitpack.io/#nekocode/ASM-Systrace)
 
 This plugin can inject `Trace.beginSection()` & `Trace.endSection` to the methods which you specify in build-time. It's useful when you want to trace the methods of third-party libraries.
 
