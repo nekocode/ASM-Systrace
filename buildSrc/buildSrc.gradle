@@ -8,7 +8,7 @@ allDependencies.each {
 apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.nekocode'
-archivesBaseName='asm-systrace-plugin'
+archivesBaseName='ASM-Systrace'
 libsDirName='output'
 
 // build a jar with source files
