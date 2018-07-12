@@ -18,6 +18,7 @@ package cn.nekocode.gradle.asm_systrace
 
 import com.android.annotations.NonNull
 import com.android.annotations.Nullable
+import com.google.common.io.ByteStreams
 import org.gradle.api.Project
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
@@ -50,12 +51,19 @@ class AsmSystraceTransform implements CustomTransform {
     }
 
     @Override
-    void transform(@NonNull InputStream is, @NonNull OutputStream os) {
-        final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS)
+    void transform(@NonNull InputStream is, @NonNull OutputStream os, @NonNull String className) {
+        if (!filterScript.invokeMethod("filterClass", [className])) {
+            // Skip this class
+            ByteStreams.copy(is, os)
+            return
+        }
 
         try {
+            final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS)
             final ClassReader cr = new ClassReader(is)
-            final ClassVisitor visitor = new AsmSystraceAdapter(writer, cr.getClassName(), filterScript)
+            final ClassVisitor visitor = new AsmSystraceAdapter(writer, { methodName, methodDesc ->
+                return filterScript.invokeMethod("filterMethod", [className, methodName, methodDesc])
+            })
 
             cr.accept(visitor, ClassReader.EXPAND_FRAMES)
             os.write(writer.toByteArray())

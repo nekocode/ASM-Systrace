@@ -25,20 +25,18 @@ import org.objectweb.asm.commons.AdviceAdapter
  * @author nekocode (nekocode.cn@gmail.com)
  */
 class AsmSystraceAdapter extends ClassVisitor {
-    String className
-    Script filterScript
+    MethodFilter filter
 
 
-    AsmSystraceAdapter(ClassVisitor cv, String className, Script filterScript) {
+    AsmSystraceAdapter(ClassVisitor cv, MethodFilter filter) {
         super(Opcodes.ASM5, cv)
-        this.className = className
-        this.filterScript = filterScript
+        this.filter = filter
     }
 
     @Override
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         final MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions)
-        final String tagName = filterScript.invokeMethod("filter", [className, name, desc])
+        final String tagName = filter.filterMethod(name, desc)
         return tagName == null ? mv : (mv != null ? new MethodAdapter(api, mv, access, name, desc, tagName) : null)
     }
 
@@ -62,5 +60,9 @@ class AsmSystraceAdapter extends ClassVisitor {
         protected void onMethodExit(int opcode) {
             mv.visitMethodInsn(INVOKESTATIC, "android/os/Trace", "endSection", "()V", false)
         }
+    }
+
+    interface MethodFilter {
+        String filterMethod(String methodName, String methodDesc)
     }
 }

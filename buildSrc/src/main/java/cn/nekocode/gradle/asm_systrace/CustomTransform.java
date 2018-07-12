@@ -34,5 +34,5 @@ public interface CustomTransform {
     @Nullable
     File getSecondaryFile();
 
-    void transform(@NonNull InputStream is, @NonNull OutputStream os);
+    void transform(@NonNull InputStream is, @NonNull OutputStream os, @NonNull String className);
 }

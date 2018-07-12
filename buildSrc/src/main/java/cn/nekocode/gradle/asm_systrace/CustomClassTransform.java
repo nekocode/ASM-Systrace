@@ -160,12 +160,14 @@ public class CustomClassTransform extends Transform {
                                 if (!inputFile.isDirectory()
                                         && inputFile.getName()
                                         .endsWith(SdkConstants.DOT_CLASS)) {
-                                    File out = toOutputFile(outputDir, inputDir, inputFile);
-                                    transformFile(inputFile, out);
+                                    String relativePath = FileUtils.relativePossiblyNonExistingPath(inputFile, inputDir);
+                                    File out = new File(outputDir, relativePath);
+                                    transformFile(inputFile, out, relativePath);
                                 }
                                 break;
                             case REMOVED:
-                                File outputFile = toOutputFile(outputDir, inputDir, inputFile);
+                                String relativePath = FileUtils.relativePossiblyNonExistingPath(inputFile, inputDir);
+                                File outputFile = new File(outputDir, relativePath);
                                 FileUtils.deleteIfExists(outputFile);
                                 break;
                         }
@@ -173,8 +175,9 @@ public class CustomClassTransform extends Transform {
                 } else {
                     for (File in : FileUtils.getAllFiles(inputDir)) {
                         if (in.getName().endsWith(SdkConstants.DOT_CLASS)) {
-                            File out = toOutputFile(outputDir, inputDir, in);
-                            transformFile(in, out);
+                            String relativePath = FileUtils.relativePossiblyNonExistingPath(in, inputDir);
+                            File out = new File(outputDir, relativePath);
+                            transformFile(in, out, relativePath);
                         }
                     }
                 }
@@ -192,7 +195,7 @@ public class CustomClassTransform extends Transform {
             while (entry != null) {
                 if (!entry.isDirectory() && entry.getName().endsWith(SdkConstants.DOT_CLASS)) {
                     zos.putNextEntry(new ZipEntry(entry.getName()));
-                    transform(zis, zos);
+                    transform(zis, zos, getClassNameFromPath(entry.getName()));
                 } else {
                     // Do not copy resources
                 }
@@ -201,24 +204,23 @@ public class CustomClassTransform extends Transform {
         }
     }
 
-    private void transformFile(File inputFile, File outputFile) throws IOException {
+    private void transformFile(File inputFile, File outputFile, String relativePath) throws IOException {
         Files.createParentDirs(outputFile);
         try (FileInputStream fis = new FileInputStream(inputFile);
             FileOutputStream fos = new FileOutputStream(outputFile)) {
-            transform(fis, fos);
+            transform(fis, fos, getClassNameFromPath(relativePath));
         }
     }
 
-    @NonNull
-    private static File toOutputFile(File outputDir, File inputDir, File inputFile) {
-        return new File(outputDir, FileUtils.relativePossiblyNonExistingPath(inputFile, inputDir));
-    }
-
-    private void transform(InputStream in, OutputStream out) throws IOException {
+    private void transform(InputStream in, OutputStream out, String className) throws IOException {
         try {
-            transform.transform(in, out);
+            transform.transform(in, out, className);
         } catch (UncheckedIOException e) {
             throw e.getCause();
         }
+    }
+
+    private static String getClassNameFromPath(String path) {
+        return path.substring(0, path.length() - ".class".length()).replace(File.separatorChar, '/');
     }
 }
